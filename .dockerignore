@@ -1,0 +1,7 @@
+**/node_modules
+**/dist
+server/retention.db
+server/retention.db-shm
+server/retention.db-wal
+.git
+*.log

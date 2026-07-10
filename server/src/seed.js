@@ -8,13 +8,32 @@ import { COHORTS, USERS_SEED, DEFAULT_PASSWORD } from './lib/config.js';
 const __dirname = path.dirname(fileURLToPath(import.meta.url));
 
 function seedUsers() {
+  const isProd = process.env.NODE_ENV === 'production';
+  const password = process.env.SEED_PASSWORD;
+
+  if (!password && isProd) {
+    console.error(
+      '\nRefusing to seed with the default password in production.\n' +
+      'Set a SEED_PASSWORD environment variable (a strong, random password shared by the\n' +
+      'seeded accounts) before running `npm run seed`, e.g.:\n\n' +
+      '  SEED_PASSWORD="<something long and random>" npm run seed\n'
+    );
+    process.exit(1);
+  }
+
+  const effectivePassword = password || DEFAULT_PASSWORD;
   const insert = db.prepare('INSERT OR IGNORE INTO users (username, password_hash, role) VALUES (?, ?, ?)');
-  const hash = bcrypt.hashSync(DEFAULT_PASSWORD, 10);
+  const hash = bcrypt.hashSync(effectivePassword, 10);
   const tx = db.transaction(() => {
     for (const u of USERS_SEED) insert.run(u.username, hash, u.role);
   });
   tx();
-  console.log(`Seeded ${USERS_SEED.length} users (default password: ${DEFAULT_PASSWORD})`);
+
+  if (password) {
+    console.log(`Seeded ${USERS_SEED.length} users with the password from SEED_PASSWORD.`);
+  } else {
+    console.log(`Seeded ${USERS_SEED.length} users (default password: ${DEFAULT_PASSWORD}) — DEV ONLY, do not use in production.`);
+  }
 }
 
 function ensureCohort(name) {

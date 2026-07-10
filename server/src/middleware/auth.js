@@ -1,6 +1,13 @@
 import jwt from 'jsonwebtoken';
 
-export const JWT_SECRET = process.env.JWT_SECRET || 'dev-secret-change-me';
+const DEV_JWT_SECRET = 'dev-secret-change-me';
+
+if (process.env.NODE_ENV === 'production' && (!process.env.JWT_SECRET || process.env.JWT_SECRET === DEV_JWT_SECRET)) {
+  console.error('\nRefusing to start in production without a real JWT_SECRET environment variable set.\n');
+  process.exit(1);
+}
+
+export const JWT_SECRET = process.env.JWT_SECRET || DEV_JWT_SECRET;
 
 export function requireAuth(req, res, next) {
   const header = req.headers.authorization || '';

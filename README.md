@@ -59,6 +59,13 @@ delete/reset weeks, and assign cohorts/tracks to Manasvi/Srinidhi from **Setting
 Team accounts only see cohorts/tracks assigned to them (falls back to "see everything"
 until an admin sets up assignments).
 
+## Deploying so your team can access it over the internet
+
+Running `npm run dev` only serves the app on your own machine (`localhost`) — nobody
+else can open it. To get a real, shareable URL, see **[DEPLOY.md](./DEPLOY.md)**: it
+walks through deploying as a single service (Render, Railway, or any Docker host) with
+real secrets instead of the dev-only default password.
+
 ## What moved server-side
 
 - **Auth**: bcrypt-hashed passwords + JWT, instead of a hardcoded plaintext map shipped
