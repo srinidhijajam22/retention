@@ -1,0 +1,11 @@
+node_modules/
+dist/
+*.log
+
+# SQLite database + WAL files (generated at runtime by `npm run seed` / server start)
+server/retention.db
+server/retention.db-shm
+server/retention.db-wal
+
+.env
+.env.local
