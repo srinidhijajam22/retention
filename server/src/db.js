@@ -11,6 +11,15 @@ const DB_PATH = process.env.DB_PATH || path.join(__dirname, '..', 'retention.db'
 // crashing on a low-level TypeError.
 fs.mkdirSync(path.dirname(DB_PATH), { recursive: true });
 
+if (process.env.NODE_ENV === 'production' && !process.env.DB_PATH) {
+  console.warn(
+    '\n[warning] DB_PATH is not set — the database lives on ephemeral storage.\n' +
+    'Data will be lost whenever this service restarts or redeploys (including free-tier\n' +
+    'sleep/wake cycles). Set DB_PATH to a mounted persistent disk to keep data across\n' +
+    'restarts. See DEPLOY.md.\n'
+  );
+}
+
 export const db = new Database(DB_PATH);
 db.pragma('journal_mode = WAL');
 db.pragma('foreign_keys = ON');

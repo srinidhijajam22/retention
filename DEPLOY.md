@@ -38,17 +38,25 @@ variables below** — the app will actually refuse to start/seed without them on
    - **Runtime**: Node
    - **Build Command**: `npm run build`
    - **Start Command**: `npm start`
-5. **Add a Persistent Disk** (Render dashboard → your service → Disks → Add Disk):
-   - **Mount path**: `/data`
-   - This is what makes the SQLite database survive restarts/redeploys — without it,
-     every deploy wipes the data.
+   - **Instance Type**: Free is fine to get started (see the persistence note below).
+5. **Persistent Disks require a paid Render plan** (Starter, ~$7/mo) — they're not
+   available on the free tier. Pick one:
+   - **Staying free**: skip adding a disk, and don't set `DB_PATH` at all (leave it out
+     of the environment variables in the next step). The database will live on the
+     service's normal ephemeral storage — this works, but **all data resets every time
+     the service restarts, redeploys, or wakes up from the free tier's idle sleep.**
+     Fine for kicking the tires; not fine for real outreach tracking you don't want to
+     lose.
+   - **Want real persistence**: upgrade the service to the Starter plan, then Disks →
+     Add Disk → mount path `/data`, and set `DB_PATH=/data/retention.db` in the next
+     step. Nothing else changes — same build, same steps.
 6. **Environment variables** (Render dashboard → Environment):
    | Key | Value |
    |---|---|
    | `NODE_ENV` | `production` |
    | `JWT_SECRET` | *(your random string from above)* |
    | `SEED_PASSWORD` | *(your chosen team password)* |
-   | `DB_PATH` | `/data/retention.db` |
+   | `DB_PATH` | `/data/retention.db` — **only if** you added a disk in step 5. Omit this variable entirely on the free tier. |
 7. **Deploy**. The `npm start` command only runs the API server — it does not seed the
    database automatically on Render, so run the seed once after the first deploy
    finishes:
@@ -103,6 +111,10 @@ you need it below.
 
 ## After deploying
 
+- **On the free tier, remember data isn't persistent.** If you skipped the disk, treat
+  this as a demo/staging environment — real outreach calls/notes logged there can
+  disappear on the next restart. Upgrading later is just: add the disk, set `DB_PATH`,
+  redeploy — no code changes.
 - **Change the shared password eventually to per-user passwords.** This app currently
   seeds one shared password across all five accounts (matching the original dashboard's
   design) — fine to get started, but if this becomes long-lived infrastructure, consider
