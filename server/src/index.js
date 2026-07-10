@@ -13,7 +13,10 @@ const __dirname = path.dirname(fileURLToPath(import.meta.url));
 const app = express();
 const PORT = process.env.PORT || 4000;
 
-app.use(cors());
+// Allow all origins by default (fine here since auth is a bearer token, not a cookie —
+// no CSRF exposure from permissive CORS). Set ALLOWED_ORIGIN to lock it down to your
+// frontend's exact domain once you know it (e.g. https://your-app.vercel.app).
+app.use(cors(process.env.ALLOWED_ORIGIN ? { origin: process.env.ALLOWED_ORIGIN } : {}));
 app.use(express.json({ limit: '5mb' }));
 
 app.get('/api/health', (req, res) => res.json({ ok: true }));

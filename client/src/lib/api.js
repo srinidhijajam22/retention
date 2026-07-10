@@ -1,6 +1,11 @@
 const TOKEN_KEY = 'belToken';
 const USER_KEY = 'belUserInfo';
 
+// Same-origin by default (single-service deploy, or local dev via the Vite proxy).
+// Set VITE_API_BASE (e.g. https://your-backend.onrender.com) when the frontend and
+// backend are hosted separately, such as frontend-on-Vercel + backend-on-Render.
+const API_BASE = import.meta.env.VITE_API_BASE || '';
+
 export function getToken() {
   return localStorage.getItem(TOKEN_KEY);
 }
@@ -23,7 +28,7 @@ async function request(path, opts = {}) {
   if (opts.body && !(opts.body instanceof FormData)) {
     headers['Content-Type'] = 'application/json';
   }
-  const res = await fetch(`/api${path}`, { ...opts, headers });
+  const res = await fetch(`${API_BASE}/api${path}`, { ...opts, headers });
   if (res.status === 401) {
     clearSession();
     window.location.reload();
@@ -53,7 +58,7 @@ export const api = {
 
   saveOutreach: (cohort, mobile, week, field, value) => request(`/cohorts/${encodeURIComponent(cohort)}/outreach/${mobile}`, { method: 'PUT', body: JSON.stringify({ week, field, value }) }),
   bulkAssign: (cohort, week, scope, person) => request(`/cohorts/${encodeURIComponent(cohort)}/outreach/bulk-assign`, { method: 'POST', body: JSON.stringify({ week, scope, person }) }),
-  exportOutreachUrl: (cohort, week) => `/api/cohorts/${encodeURIComponent(cohort)}/outreach/export?week=${encodeURIComponent(week)}`,
+  exportOutreachUrl: (cohort, week) => `${API_BASE}/api/cohorts/${encodeURIComponent(cohort)}/outreach/export?week=${encodeURIComponent(week)}`,
 
   getAssignments: () => request('/assignments'),
   toggleAssignment: (person, cohort, track, checked) => request('/assignments/toggle', { method: 'POST', body: JSON.stringify({ person, cohort, track, checked }) }),
