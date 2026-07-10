@@ -1,9 +1,15 @@
 import Database from 'better-sqlite3';
+import fs from 'node:fs';
 import path from 'node:path';
 import { fileURLToPath } from 'node:url';
 
 const __dirname = path.dirname(fileURLToPath(import.meta.url));
 const DB_PATH = process.env.DB_PATH || path.join(__dirname, '..', 'retention.db');
+
+// better-sqlite3 won't create the parent directory itself — if DB_PATH points
+// somewhere like a not-yet-provisioned mounted disk, fail loudly instead of
+// crashing on a low-level TypeError.
+fs.mkdirSync(path.dirname(DB_PATH), { recursive: true });
 
 export const db = new Database(DB_PATH);
 db.pragma('journal_mode = WAL');
